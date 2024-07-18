@@ -163,7 +163,7 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
     filter = ColorFilter()
     while True:
-        image = cap.read()
+        _,image = cap.read()
         box = filter.auto_average_position(image)
 
         if box is not None:

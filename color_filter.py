@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 
 class ColorFilter:
-
     """
         discord: @kialli
         github: @kchan5071
@@ -10,19 +9,19 @@ class ColorFilter:
         This class filters out a specific color from an image and returns the image with only the color in it.
         It also returns the average position of the color in the image.
     """
+    
     def __init__(self):
-        self.sensitivity = 10
-        self.color_target = [255, 0, 0]
-        self.amount_in_image = 1
-        self.alpha_threshold = 10
-        self.iterations = 10
+        self.sensitivity        = 10
+        self.color_target       = [255, 0, 0]
+        self.amount_in_image    = 1
+        self.alpha_threshold    = 10
+        self.iterations         = 10
 
     def set_color_target(self, color):
         """
             sets the color that the filter will target
         """
         self.color_target = color
-
 
     def get_image(self, image):
         """
@@ -116,7 +115,6 @@ class ColorFilter:
         image[image < self.alpha_threshold] = 0
         return image
     
-    
     def get_average_position(self, image):
         """
             gets the average position of the target color in the image
@@ -144,8 +142,6 @@ class ColorFilter:
         if np.isnan(x) or np.isnan(y):
             return None
         return (x, y)
-        
-
 
     def auto_average_position(self, image):
         """

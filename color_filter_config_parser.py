@@ -13,7 +13,7 @@ class Color_Config_Parser:
 
     def __init__(self):
         self.config_file = "color_filter_config"
-        self.colors = []
+        self.colors      = []
 
     def get_colors(self):
         """
@@ -29,12 +29,16 @@ class Color_Config_Parser:
         with open(self.config_file, "r") as file:
             config_string = file.readline()
             while config_string != "" and config_string is not None:
+                #getting the name of the color
                 name = config_string.split(" ")[0].strip(":")
-                end_of_name_index = config_string.find("")
-                color_list_string = config_string[end_of_name_index:].strip().split(" ")[1].split(",")
+
+                #this cursed line is used to get the color values from the config file
+                color_list_string = config_string.strip().split(" ")[1].split(",")
+
                 color_list_integers = []
                 for color_string in color_list_string:
                     color_list_integers.append(int(color_string))
+
                 self.colors.append(self.Color(color_list_integers, name))
                 config_string = file.readline()
 

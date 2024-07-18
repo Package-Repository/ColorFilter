@@ -37,7 +37,6 @@ class Color_Config_Parser:
                     color_list_integers.append(int(color_string))
                 self.colors.append(self.Color(color_list_integers, name))
                 config_string = file.readline()
-    
 
     def add_color(self, color, name):
         """
@@ -53,6 +52,7 @@ class Color_Config_Parser:
                 file.write(str(color[i]))
                 if i != len(color) - 1:
                     file.write(",")
+                    self.colors.append(self.Color(color, name))
             file.write("\n")
 
     def find_color(self, name):
@@ -75,8 +75,6 @@ class Color_Config_Parser:
 
         return -1
 
-
-
     def remove_color(self, name):
         """
             removes a color from the config file
@@ -97,6 +95,7 @@ class Color_Config_Parser:
                 if not line.startswith(name):
                     file.write(line)
                 else:
+                    self.colors.pop(self.find_color(name))
                     return True
         return False
 

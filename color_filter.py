@@ -4,16 +4,16 @@ import cv2
 class ColorFilter:
     """
         discord: @kialli
-        github: @kchan5071
+        github: @kchan5071cv2.CAP_DSHOW
         
         This class filters out a specific color from an image and returns the image with only the color in it.
         It also returns the average position of the color in the image.
     """
     
     def __init__(self):
-        self.sensitivity        = 10
+        self.sensitivity        = 100
         self.color_target       = [255, 0, 0]
-        self.amount_in_image    = 1
+        self.amount_in_image    = 600
         self.alpha_threshold    = 10
         self.iterations         = 10
 
@@ -39,23 +39,14 @@ class ColorFilter:
         if image is None:
             return None
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        lower_color = np.array([self.color_target[0] + self.sensitivity, 
-                                self.color_target[1] + self.sensitivity, 
-                                self.color_target[2] + self.sensitivity])
-        upper_color = np.array([self.color_target[0] - self.sensitivity,
-                                self.color_target[1] - self.sensitivity,
+        lower_color = np.array([self.color_target[0] - self.sensitivity, 
+                                self.color_target[1] - self.sensitivity, 
                                 self.color_target[2] - self.sensitivity])
+        upper_color = np.array([self.color_target[0] + self.sensitivity,
+                                self.color_target[1] + self.sensitivity,
+                                self.color_target[2] + self.sensitivity])
         mask = cv2.inRange(image, lower_color, upper_color)
         result = cv2.bitwise_and(image, image, mask=mask)
-
-        #find average of the image
-        pixels = image.shape[0] * image.shape[1]
-
-        if np.sum(mask) / pixels < self.amount_in_image:
-            self.sensitivity -= 1
-
-        elif np.sum(mask) / pixels > self.amount_in_image:
-            self.sensitivity += 1
 
         result = self.dilate_image(result)
         result = self.erode_image(result)
@@ -97,7 +88,7 @@ class ColorFilter:
             return None
         element = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 10))
         return cv2.erode(image, element, self.iterations)
-    
+              
     def remove_values_below_threshold(self, image):
         """
             removes values below a certain threshold (alpha_threshold) from the image
@@ -133,7 +124,13 @@ class ColorFilter:
         _, thresh = cv2.threshold(gray, 100, 255, cv2.ADAPTIVE_THRESH_MEAN_C)
         valid_pixels = np.where(thresh > 0)
 
-        if len(valid_pixels) == 0:
+        if len(valid_pixels[0]) < self.amount_in_image:
+            self.sensitivity += 1
+
+        elif len(valid_pixels[0]) > self.amount_in_image:
+            self.sensitivity -= 1
+
+        if len(valid_pixels[0]) == 0:
             return None
         
         x = np.mean(valid_pixels[1])
@@ -150,22 +147,26 @@ class ColorFilter:
             calls get_image and get_average_position
 
             input:
-                image: the image to get the average position from
+                image: the image to get the average poscv2.CAP_DSHOWcv2.CAP_DSHOWition from
 
             output:
                 the average position of the target color in the image as a tuple
                 returns None if the image is None
+
+                image: modified image
         """
         image = self.get_image(image)
-        return self.get_average_position(image)
+        box = self.get_average_position(image)
+        if box is not None:
+            image = cv2.circle(img=image, center=(int(box[0]), int(box[1])), radius= 10, color=(255, 0, 0), thickness=2)
+        return image, box
 
 if __name__ == '__main__':
-    cap = cv2.VideoCapture(0)
+    _, cap = cv2.VideoCapture(5)
     filter = ColorFilter()
     while True:
         image = cap.read()
         box = filter.auto_average_position(image)
-
         if box is not None:
             image = cv2.circle(img=image, center=(int(box[0]), int(box[1])), radius= 10, color=(255, 0, 0), thickness=2)
         print(box)

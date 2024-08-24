@@ -1,5 +1,6 @@
-import numpy as np
+import numpy                        as np
 import cv2
+from color_filter_config_parser     import Color_Config_Parser
 
 class ColorFilter:
     """
@@ -166,9 +167,14 @@ class ColorFilter:
 
 if __name__ == '__main__':
     cap = cv2.VideoCapture(0)
+    parser = Color_Config_Parser()
+    parser.parse_config()
+    colors = parser.get_colors()
     filter = ColorFilter()
+    filter.set_color_target(colors[0].get_colors())
+    print(filter.color_target)
     while True:
-        _, image = cap.read()
+        _ ,image = cap.read()
         box = filter.auto_average_position(image)
         # if box is not None:
             # image = cv2.circle(img=image, center=(int(box[0]), int(box[1])), radius= 10, color=(255, 0, 0), thickness=2)

@@ -13,9 +13,10 @@ class ColorFilter:
     def __init__(self):
         self.sensitivity        = 100
         self.color_target       = [255, 0, 0]
-        self.amount_in_image    = 600
+        self.amount_in_image    = 5000
         self.alpha_threshold    = 10
         self.iterations         = 10
+        self.sensitivity_cap    = 100
 
     def set_color_target(self, color):
         """
@@ -124,7 +125,8 @@ class ColorFilter:
         _, thresh = cv2.threshold(gray, 100, 255, cv2.ADAPTIVE_THRESH_MEAN_C)
         valid_pixels = np.where(thresh > 0)
 
-        if len(valid_pixels[0]) < self.amount_in_image:
+        if len(valid_pixels[0]) < self.amount_in_image\
+            and self.sensitivity < self.sensitivity_cap:
             self.sensitivity += 1
 
         elif len(valid_pixels[0]) > self.amount_in_image:
@@ -155,6 +157,7 @@ class ColorFilter:
 
                 image: modified image
         """
+        # return_image = image
         image = self.get_image(image)
         box = self.get_average_position(image)
         if box is not None:
@@ -162,14 +165,14 @@ class ColorFilter:
         return image, box
 
 if __name__ == '__main__':
-    _, cap = cv2.VideoCapture(5)
+    cap = cv2.VideoCapture(0)
     filter = ColorFilter()
     while True:
-        image = cap.read()
+        _, image = cap.read()
         box = filter.auto_average_position(image)
-        if box is not None:
-            image = cv2.circle(img=image, center=(int(box[0]), int(box[1])), radius= 10, color=(255, 0, 0), thickness=2)
-        print(box)
+        # if box is not None:
+            # image = cv2.circle(img=image, center=(int(box[0]), int(box[1])), radius= 10, color=(255, 0, 0), thickness=2)
+        print(filter.sensitivity)
         cv2.imshow('image', image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
